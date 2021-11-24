@@ -1,0 +1,110 @@
+Description: >
+  Ricardo Bonilla
+  This template deploy the security for each service.
+
+Parameters:
+
+  EnvironmentName:
+    Description: An environment name that will be prefixed to resource names
+    Type: String
+    Default: staging
+    AllowedValues:
+      - production
+      - staging
+      - sandbox
+      - development
+
+Conditions:
+
+  NotSandbox: !Not
+    - !Equals 
+      - !Ref EnvironmentName
+      - sandbox
+
+  IsSandbox: !Equals 
+    - !Ref EnvironmentName
+    - sandbox
+
+Resources:
+
+  LBSecGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Allow http to client host
+      VpcId:
+        Fn::ImportValue:
+          !Sub "${EnvironmentName}-VPCID"
+      SecurityGroupIngress:
+      - IpProtocol: tcp
+        FromPort: 80
+        ToPort: 80
+        CidrIp: 0.0.0.0/0
+      SecurityGroupEgress:
+      - IpProtocol: tcp
+        FromPort: 80
+        ToPort: 80
+        CidrIp: 0.0.0.0/0
+
+  WebServerSecGroup:
+    Type: AWS::EC2::SecurityGroup
+    Condition: NotSandbox
+    Properties:
+      GroupDescription: Allow http to our hosts
+      VpcId:
+        Fn::ImportValue:
+          !Sub "${EnvironmentName}-VPCID"
+      SecurityGroupIngress:
+      - IpProtocol: tcp
+        FromPort: 80
+        ToPort: 80
+        CidrIp: 0.0.0.0/0
+      SecurityGroupEgress:
+      - IpProtocol: tcp
+        FromPort: 0
+        ToPort: 65535
+        CidrIp: 0.0.0.0/0
+
+  SandboxWebServerSecGroup:
+    Type: AWS::EC2::SecurityGroup
+    Condition: IsSandbox
+    Properties:
+      GroupDescription: Allow http and ssh to our hosts
+      VpcId:
+        Fn::ImportValue:
+          !Sub "${EnvironmentName}-VPCID"
+      SecurityGroupIngress:
+      - IpProtocol: tcp
+        FromPort: 80
+        ToPort: 80
+        CidrIp: 0.0.0.0/0
+      - IpProtocol: tcp
+        FromPort: 22
+        ToPort: 22
+        CidrIp: 0.0.0.0/0
+      SecurityGroupEgress:
+      - IpProtocol: tcp
+        FromPort: 0
+        ToPort: 65535
+        CidrIp: 0.0.0.0/0
+
+Outputs:
+
+  LBSecGroup:
+    Description: A reference to the load balancer security group
+    Value: !Ref LBSecGroup
+    Export:
+      Name: !Sub ${EnvironmentName}-LB-SEC-GROUP
+
+  WebServerSecGroup:
+    Description: A reference to web server security group
+    Value: !Ref WebServerSecGroup
+    Condition: NotSandbox
+    Export:
+      Name: !Sub ${EnvironmentName}-WS-SEC-GROUP
+
+  SandboxWebServerSecGroup:
+    Description: A reference to web server security group with ssh access
+    Value: !Ref SandboxWebServerSecGroup
+    Condition: IsSandbox
+    Export:
+      Name: !Sub ${EnvironmentName}-sandbox-WS-SEC-GROUP

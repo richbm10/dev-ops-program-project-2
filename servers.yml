@@ -1,0 +1,147 @@
+Description: >
+  Ricardo Bonilla
+  This template deploy servers within the defined network.
+
+Parameters:
+
+  EnvironmentName:
+    Description: An environment name that will be prefixed to resource names
+    Type: String
+    Default: staging
+    AllowedValues:
+      - production
+      - staging
+      - sandbox
+      - development
+
+Conditions:
+
+  NotSandbox: !Not
+    - !Equals 
+      - !Ref EnvironmentName
+      - sandbox
+
+  IsSandbox: !Equals 
+    - !Ref EnvironmentName
+    - sandbox
+
+Resources:
+
+  WebAppLaunchConfig:
+    Type: AWS::AutoScaling::LaunchConfiguration
+    Condition: NotSandbox
+    Properties:
+      UserData:
+        Fn::Base64: !Sub |
+          #!/bin/bash
+          apt-get update -y
+          apt-get install apache2 -y
+          systemctl start apache2.service
+          cd /var/www/html
+          echo "Udacity Demo Web Server Up and Running!" > index.html
+      ImageId: ami-0ac73f33a1888c64a
+      KeyName: VocareumKey2
+      SecurityGroups:
+      - Fn::ImportValue:
+          !Sub "${EnvironmentName}-WS-SEC-GROUP"
+      InstanceType: t3.small
+      BlockDeviceMappings:
+      - DeviceName: "/dev/sdk"
+        Ebs:
+          VolumeSize: '10'
+
+  SandboxWebAppLaunchConfig:
+    Type: AWS::AutoScaling::LaunchConfiguration
+    Condition: IsSandbox
+    Properties:
+      UserData:
+        Fn::Base64: !Sub |
+          #!/bin/bash
+          apt-get update -y
+          apt-get install apache2 -y
+          systemctl start apache2.service
+          cd /var/www/html
+          echo "Udacity Demo Web Server Up and Running!" > index.html
+      ImageId: ami-0ac73f33a1888c64a
+      KeyName: VocareumKey2
+      SecurityGroups:
+      - Fn::ImportValue:
+          !Sub "${EnvironmentName}-sandbox-WS-SEC-GROUP"
+      InstanceType: t3.small
+      BlockDeviceMappings:
+      - DeviceName: "/dev/sdk"
+        Ebs:
+          VolumeSize: '10'
+  
+  WebAppGroup:
+    Type: AWS::AutoScaling::AutoScalingGroup
+    Condition: NotSandbox
+    Properties:
+      VPCZoneIdentifier:
+      - Fn::ImportValue:
+          !Sub "${EnvironmentName}-PRIV-NETS"
+      LaunchConfigurationName: !Ref WebAppLaunchConfig
+      MinSize: '4'
+      MaxSize: '4'
+      TargetGroupARNs:
+      - !Ref WebAppTargetGroup
+
+  SandboxWebAppGroup:
+    Type: AWS::AutoScaling::AutoScalingGroup
+    Condition: IsSandbox
+    Properties:
+      VPCZoneIdentifier:
+      - Fn::ImportValue:
+          !Sub "${EnvironmentName}-PRIV-NETS"
+      LaunchConfigurationName: !Ref SandboxWebAppLaunchConfig
+      MinSize: '4'
+      MaxSize: '4'
+      TargetGroupARNs:
+      - !Ref WebAppTargetGroup
+
+  WebAppLB:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      Subnets:
+      - Fn::ImportValue: !Sub "${EnvironmentName}-PUB1-SN"
+      - Fn::ImportValue: !Sub "${EnvironmentName}-PUB2-SN"
+      SecurityGroups:
+      - Fn::ImportValue:
+          !Sub "${EnvironmentName}-LB-SEC-GROUP"
+
+  Listener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      DefaultActions:
+      - Type: forward
+        TargetGroupArn: !Ref WebAppTargetGroup
+      LoadBalancerArn: !Ref WebAppLB
+      # Port: 443 for HTTPS, but this require a SSL certificate
+      Port: 80 
+      Protocol: HTTP
+
+  ALBListenerRule:
+    Type: AWS::ElasticLoadBalancingV2::ListenerRule
+    Properties:
+      Actions:
+      - Type: forward
+        TargetGroupArn: !Ref WebAppTargetGroup
+      Conditions:
+      - Field: path-pattern
+        Values: [/]
+      ListenerArn: !Ref Listener
+      Priority: 1
+
+  WebAppTargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      HealthCheckIntervalSeconds: 10
+      HealthCheckPath: /
+      HealthCheckProtocol: HTTP
+      HealthCheckTimeoutSeconds: 8
+      HealthyThresholdCount: 2
+      Port: 80
+      Protocol: HTTP
+      UnhealthyThresholdCount: 5
+      VpcId:
+        Fn::ImportValue: !Sub "${EnvironmentName}-VPCID"
