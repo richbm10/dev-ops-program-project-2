@@ -39,8 +39,8 @@ Resources:
           systemctl start apache2.service
           cd /var/www/html
           echo "Udacity Demo Web Server Up and Running!" > index.html
-      ImageId: ami-0ac73f33a1888c64a
-      KeyName: VocareumKey2
+      ImageId: ami-09889d8d54f9e0a0e
+      KeyName: UdacityProjectKey1
       SecurityGroups:
       - Fn::ImportValue:
           !Sub "${EnvironmentName}-WS-SEC-GROUP"
@@ -62,8 +62,8 @@ Resources:
           systemctl start apache2.service
           cd /var/www/html
           echo "Udacity Demo Web Server Up and Running!" > index.html
-      ImageId: ami-0ac73f33a1888c64a
-      KeyName: VocareumKey2
+      ImageId: ami-09889d8d54f9e0a0e
+      KeyName: UdacityProjectKey2
       SecurityGroups:
       - Fn::ImportValue:
           !Sub "${EnvironmentName}-sandbox-WS-SEC-GROUP"
