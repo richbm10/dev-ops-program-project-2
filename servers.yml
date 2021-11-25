@@ -38,7 +38,7 @@ Resources:
           apt-get install apache2 -y
           systemctl start apache2.service
           cd /var/www/html
-          echo "Udacity Demo Web Server Up and Running!" > index.html
+          echo "it works! Udagram, Udacity" > index.html
       ImageId: ami-09889d8d54f9e0a0e
       KeyName: UdacityProjectKey1
       SecurityGroups:
@@ -61,7 +61,7 @@ Resources:
           apt-get install apache2 -y
           systemctl start apache2.service
           cd /var/www/html
-          echo "Udacity Demo Web Server Up and Running!" > index.html
+          echo "it works! Udagram, Udacity" > index.html
       ImageId: ami-09889d8d54f9e0a0e
       KeyName: UdacityProjectKey2
       SecurityGroups:
