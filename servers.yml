@@ -40,7 +40,6 @@ Resources:
           cd /var/www/html
           echo "it works! Udagram, Udacity" > index.html
       ImageId: ami-09889d8d54f9e0a0e
-      KeyName: UdacityProjectKey1
       SecurityGroups:
       - Fn::ImportValue:
           !Sub "${EnvironmentName}-WS-SEC-GROUP"
@@ -63,7 +62,6 @@ Resources:
           cd /var/www/html
           echo "it works! Udagram, Udacity" > index.html
       ImageId: ami-09889d8d54f9e0a0e
-      KeyName: UdacityProjectKey2
       SecurityGroups:
       - Fn::ImportValue:
           !Sub "${EnvironmentName}-sandbox-WS-SEC-GROUP"
@@ -145,3 +143,9 @@ Resources:
       UnhealthyThresholdCount: 5
       VpcId:
         Fn::ImportValue: !Sub "${EnvironmentName}-VPCID"
+
+Outputs:
+
+  WebAppLBUrl:
+    Description: The URL of the WebAppLB
+    Value: !Sub "http://${WebAppLB.DNSName}"
