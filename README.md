@@ -23,4 +23,6 @@ ran to make sure the 4 instance are running properly.
 Instead of using ./create.sh use the ./update.sh script
 
 ### Working test after infraestructure is created
-Copy the project-2-servers-stack WebAppLBUrl output and paste it in a browser
+Copy the project-2-servers-stack WebAppLBUrl output and paste it in a browser.
+
+Currently the production env is running on: http://proje-webap-1jnkgkr0hs682-1142889075.us-west-2.elb.amazonaws.com/
