@@ -16,3 +16,6 @@
 
 ### How to Update any of the Stacks?
 Instead of using ./create.sh use the ./update.sh script
+
+### Working test after infraestructure is created
+Copy the project-2-servers-stack WebAppLBUrl output and paste it in a browser
