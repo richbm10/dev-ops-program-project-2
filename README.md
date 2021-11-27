@@ -1,5 +1,10 @@
 # dev-ops-program-project-2
 
+This repository includes the AWS cloudformation template files to create a scalable and resilient infrastructure
+to host an Apache Web Server with high availability. The infrastructure runs 4 EC2 instances that can be reached
+through a same website URL thanks the to Load Balancer that is used. Also, automated health checks are constantly
+ran to make sure the 4 instance are running properly.
+
 ### How to Create the Complete Infraestructure?
 
 ##### 1. Create the Public Network Stack
