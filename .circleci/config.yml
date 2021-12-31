@@ -23,12 +23,8 @@ jobs:
           command: "echo World!"
   print-name:
     docker:
-      - image: cimg/base:2020.01
-        auth:
-          username: mydockerhub-user
-          password: $DOCKERHUB_PASSWORD
+      - image: circleci/node:13.8.0
     steps:
-      - checkout
       - run:
           name: "Print my Name"
           command: |
