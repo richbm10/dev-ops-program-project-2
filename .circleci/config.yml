@@ -5,37 +5,34 @@ version: 2.1
 # Define a job to be invoked later in a workflow.
 # See: https://circleci.com/docs/2.0/configuration-reference/#jobs
 jobs:
-  print-hello:
+  save_hello_world_output:
     docker:
       - image: circleci/node:13.8.0
     # Add steps to the job
     # See: https://circleci.com/docs/2.0/configuration-reference/#steps
     steps:
       - run:
-          name: "Say hello"
-          command: "echo Hello"
-  print-world:
+          name: "Output hello world to file"
+          command: echo "Hello World!" > /tmp/workspace/tests/output.txt
+      - persist_to_workspace:
+          root: /tmp/workspace
+          paths:
+            - tests/*
+
+  print_output_file:
     docker:
       - image: circleci/node:13.8.0
     steps:
+      - attach_workspace:
+          at: /tmp/workspace
       - run:
-          name: "Say world"
-          command: "echo World!"
-  print-name:
-    docker:
-      - image: circleci/node:13.8.0
-    steps:
-      - run:
-          name: "Print my Name"
-          command: |
-            echo $NAME
+          name: "Prints the contents of output.txt"
+          command: cat output.txt
+
 
 # Invoke jobs via workflows
 # See: https://circleci.com/docs/2.0/configuration-reference/#workflows
 workflows:
   say-hello-world-workflow:
     jobs:
-      - print-hello
-      - print-world:
-          requires: [print-hello]
-      - print-name
+      - save_hello_world_output
