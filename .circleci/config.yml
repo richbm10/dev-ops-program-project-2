@@ -20,11 +20,15 @@ jobs:
       - print_pipeline_id
       - run:
           name: "Output hello world to file"
-          command: echo "Hello World!" > ~/output.txt
+          command: echo "Hello World!" > /tmp/workspace/output.txt
       - persist_to_workspace:
-          root: ~/
+          root: /tmp/workspace
           paths:
             - output.txt
+      - run:
+          name: "Failed to persist workspace output file"
+          command: echo "Failed to persist output.txt"
+          when: on_fail
 
   print_output_file:
     docker:
