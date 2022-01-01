@@ -20,9 +20,9 @@ jobs:
       - print_pipeline_id
       - run:
           name: "Output hello world to file"
-          command: echo "Hello World!" > /tmp/workspace/output.txt
+          command: echo "Hello World!" > ~/output.txt
       - persist_to_workspace:
-          root: /tmp/workspace
+          root: ~/
           paths:
             - output.txt
       - run:
