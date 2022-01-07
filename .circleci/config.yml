@@ -30,18 +30,18 @@ jobs:
           command: echo "Failed to persist output.txt"
           when: on_fail
   
-  # create_infrastructure:
-  #   docker:
-  #     - image: amazon/aws-cli
-  #   steps:
-  #     - checkout
-  #     - run:
-  #         name: Create Cloudformation Stack
-  #         command: |
-  #             aws cloudformation deploy \
-  #               --template-file template.yml \
-  #               --stack-name myStack-${CIRCLE_WORKFLOW_ID:0:5} \
-  #               --region us-east-1
+  create_infrastructure:
+    docker:
+      - image: amazon/aws-cli
+    steps:
+      - checkout
+      - run:
+          name: Create Cloudformation Stack
+          command: |
+              aws cloudformation deploy \
+                --template-file template.yml \
+                --stack-name myStack-${CIRCLE_WORKFLOW_ID:0:5} \
+                --region us-east-1
 
   configure_infrastructure:
     docker:
@@ -60,7 +60,7 @@ jobs:
       - run:
           name: Configure server
           command: |
-            ansible-playbook -i .ansible/inventory.txt .ansible/main-remote.yml
+            ansible-playbook -i ./ansible/inventory.txt ./ansible/main-remote.yml
 
   print_output_file:
     docker:
@@ -78,6 +78,7 @@ jobs:
 workflows:
   say-hello-world-workflow:
     jobs:
+      # - create_infrastructure
       - configure_infrastructure
       # - save_hello_world_output
       # - print_output_file:
