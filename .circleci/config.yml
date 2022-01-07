@@ -43,6 +43,25 @@ jobs:
                 --stack-name myStack-${CIRCLE_WORKFLOW_ID:0:5} \
                 --region us-east-1
 
+  # configure_infrastructure:
+  #   docker:
+  #     - image: python:3.7-alpine3.11
+  #   steps:
+  #     - checkout
+  #     - add_ssh_keys:
+  #         fingerprints: [
+  #             "ee:ca:f5:96:58:72:96:a9:b4:33:80:36:b9:90:8d:f6
+  #             ",
+  #           ]
+  #     - run:
+  #         name: Install dependencies
+  #         command: |
+  #           apk add --update ansible #install the dependencies needed for your playbook
+  #     - run:
+  #         name: Configure server
+  #         command: |
+  #           ansible-playbook -i ../.ansible/inventory.txt ../.ansible/main-remote.yml
+
   print_output_file:
     docker:
       - image: circleci/node:13.8.0
