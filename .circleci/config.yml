@@ -32,7 +32,8 @@ jobs:
   
   create_infrastructure:
     docker:
-      - image: amazon/aws-cli
+    # For using the aws cli we need to add the profile credentials as env variables in circleci
+      - image: amazon/aws-cli 
     steps:
       - checkout
       - run:
@@ -78,7 +79,7 @@ workflows:
   say-hello-world-workflow:
     jobs:
       # - create_infrastructure
-      - configure_infrastructure
-      # - save_hello_world_output
-      # - print_output_file:
-      #     requires: [save_hello_world_output]
+      # - configure_infrastructure
+      - save_hello_world_output
+      - print_output_file:
+          requires: [save_hello_world_output]
