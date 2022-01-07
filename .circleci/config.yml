@@ -29,6 +29,19 @@ jobs:
           name: "Failed to persist workspace output file"
           command: echo "Failed to persist output.txt"
           when: on_fail
+  
+  create_infrastructure:
+    docker:
+      - image: amazon/aws-cli
+    steps:
+      - checkout
+      - run:
+          name: Create Cloudformation Stack
+          command: |
+              aws cloudformation deploy \
+                --template-file template.yml \
+                --stack-name myStack-${CIRCLE_WORKFLOW_ID:0:5} \
+                --region us-east-1
 
   print_output_file:
     docker:
@@ -46,6 +59,7 @@ jobs:
 workflows:
   say-hello-world-workflow:
     jobs:
-      - save_hello_world_output
-      - print_output_file:
-          requires: [save_hello_world_output]
+      - create_infrastructure
+      # - save_hello_world_output
+      # - print_output_file:
+      #     requires: [save_hello_world_output]
