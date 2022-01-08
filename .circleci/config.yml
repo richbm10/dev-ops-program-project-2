@@ -7,6 +7,15 @@ commands:
     description: "Prints the CircleCI Workflow ID"
     steps:
       - run: echo $CIRCLE_WORKFLOW_ID
+  destroy_environment:
+     steps:
+       - run:
+           name: Destroy environment
+           # ${CIRCLE_WORKFLOW_ID} is a Built-in environment variable 
+           # ${CIRCLE_WORKFLOW_ID:0:5} takes the first 5 chars of the variable CIRCLE_CI_WORKFLOW_ID 
+           when: on_fail
+           command: |
+             aws cloudformation delete-stack --stack-name myStack-${CIRCLE_WORKFLOW_ID:0:7}
 
 # Define a job to be invoked later in a workflow.
 # See: https://circleci.com/docs/2.0/configuration-reference/#jobs
@@ -41,7 +50,7 @@ jobs:
           command: |
               aws cloudformation deploy \
                 --template-file template.yml \
-                --stack-name myStack-${CIRCLE_WORKFLOW_ID:0:5} \
+                --stack-name myStack-${CIRCLE_WORKFLOW_ID:0:7} \
                 --region us-east-1
 
   configure_infrastructure:
@@ -77,18 +86,11 @@ jobs:
     docker:
       - image: alpine:latest
     steps:
-      - run: apk add --update curl
       - run:
-          name: smoke test
-          command: |
-            URL="https://testingfailure9092.com/"
-            # Test if website exists
-            if curl -s --head ${URL} 
-            then
-              return 0
-            else
-              return 1
-            fi
+          name: Test job
+          # Fail the job intentionally to simulate an error.
+          command:  return 1
+      - destroy_environment
 
 
 # Invoke jobs via workflows
@@ -96,7 +98,7 @@ jobs:
 workflows:
   project-2-workflow:
     jobs:
-      # - create_infrastructure
+      - create_infrastructure
       # - configure_infrastructure
       # - save_hello_world_output
       # - print_output_file:
