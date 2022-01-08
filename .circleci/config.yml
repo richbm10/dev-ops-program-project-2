@@ -103,4 +103,5 @@ workflows:
       # - save_hello_world_output
       # - print_output_file:
       #     requires: [save_hello_world_output]
-      - smoke_test
+      - smoke_test:
+          requires: [create_infrastructure]
